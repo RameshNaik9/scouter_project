@@ -68,6 +68,8 @@ def get_args_parser():
                         help='path where to save, empty for no saving')
     parser.add_argument('--pre_dir', default='pre_model/',
                         help='path of pre-train model')
+    # parser.add_argument('--device', default='cpu',
+    #                     help='device to use for training / testing')
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
     parser.add_argument('--num_workers', default=4, type=int)
