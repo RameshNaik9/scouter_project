@@ -1,25 +1,11 @@
-# from PIL import Image
-# import argparse
-# import torch
-# from torchvision import transforms
-# from PIL import Image
-# from sloter.slot_model import SlotModel
-# from train import get_args_parser
-# from torchvision import transforms
-
-
-from __future__ import print_function
+from PIL import Image
 import argparse
 import torch
-from torchvision import datasets, transforms
+from torchvision import transforms
 from PIL import Image
-import numpy as np
-import os, os.path
-from sloter.utils.vis import apply_colormap_on_image
 from sloter.slot_model import SlotModel
 from train import get_args_parser
-from torchvision import datasets, transforms
-
+from torchvision import transforms
 
 # ignoring deprecated warnings
 import warnings
@@ -36,40 +22,16 @@ def test(model, device, image):
     # # print(output[0])
     # print(pred[0][0].int().item())
     r = pred[0][0].int().item()
-    
-
-    #For vis
-    image_raw = img
-    image_raw.save('test-images/test-vis/image.png')
-    print(torch.argmax(output[vis_id]).item())
-    model.train()
-
-    for id in range(args.num_classes):
-        image_raw = Image.open('test-images/test-vis/image.png').convert('RGB')
-        slot_image = np.array(Image.open(f'test-images/test-vis/slot_{id}.png').resize(image_raw.size, resample=Image.BILINEAR), dtype=np.uint8)
-
-        heatmap_only, heatmap_on_image = apply_colormap_on_image(image_raw, slot_image, 'jet')
-        heatmap_on_image.save(f'test-images/test-vis/slot_mask_{id}.png')
-
-    if args.cal_area_size:
-        slot_image = np.array(Image.open(f'test-images/test-vis/slot_{str(label) if args.loss_status>0 else str(label+1)}.png'), dtype=np.uint8)
-        slot_image_size = slot_image.shape
-        attention_ratio = float(slot_image.sum()) / float(slot_image_size[0]*slot_image_size[1]*255)
-        print(f"attention_ratio: {attention_ratio}")
-    
     return r
-
-
 
 
 def main(args):
     args_dict = vars(args)
-    args_for_evaluation = ['num_classes', 'lambda_value', 'power', 'slots_per_class']
+    args_for_evaluation = ['num_classes',
+                           'lambda_value', 'power', 'slots_per_class']
     args_type = [int, float, int, int]
     for arg_id, arg in enumerate(args_for_evaluation):
         args_dict[arg] = args_type[arg_id](args_dict[arg])
-
-    os.makedirs('test-images/test-vis', exist_ok=True)
 
     model_name = f"{args.dataset}_" + f"{'use_slot_' if args.use_slot else 'no_slot_'}"\
         + f"{'negative_' if args.use_slot and args.loss_status != 1 else ''}"\
