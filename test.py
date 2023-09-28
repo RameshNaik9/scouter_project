@@ -1,11 +1,11 @@
 from __future__ import print_function
 import argparse
 import torch
-import torch.nn.functional as F
+# import torch.nn.functional as F
 from torchvision import datasets, transforms
 from PIL import Image
 import numpy as np
-from timm.models import create_model
+# from timm.models import create_model
 import os, os.path
 from sloter.utils.vis import apply_colormap_on_image
 from sloter.slot_model import SlotModel
@@ -15,13 +15,17 @@ from torchvision import datasets, transforms
 from dataset.ConText import ConText, MakeList, MakeListImage
 from dataset.CUB200 import CUB_200
 
+# ignoring deprecated warnings
+import warnings
+warnings.filterwarnings("ignore")
+
 def test(args, model, device, img, image, label, vis_id):
     model.to(device)
     model.eval()
     image = image.to(device, dtype=torch.float32)
     output = model(torch.unsqueeze(image, dim=0))
     pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
-    print(output[0])
+    # print(output[0])
     print(pred[0])
 
     #For vis
@@ -94,9 +98,18 @@ def main():
     elif args.dataset == 'MNIST':
         dataset_val = datasets.MNIST('./data/mnist', train=False, transform=transform)
         data_loader_val = torch.utils.data.DataLoader(dataset_val, args.batch_size, shuffle=False, num_workers=1, pin_memory=True)
-        image = iter(data_loader_val).next()[0][0]
+        dataiter = iter(data_loader_val)
+        dt = next(dataiter)
+        # image = iter(data_loader_val).next()[0][0]
+        image = dt[0][0]
         label = ''
         image_orl = Image.fromarray((image.cpu().detach().numpy()*255).astype(np.uint8)[0], mode='L')
+      
+
+        # test code
+        # test_image_raw = Image.open('test-images/eight.png').resize((260, 260)).convert('L')
+        # image_orl = test_image_raw
+
         image = transform(image_orl)
         transform = transforms.Compose([transforms.Normalize((0.1307,), (0.3081,))])
     # CUB
