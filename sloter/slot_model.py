@@ -117,6 +117,10 @@ class SlotModel(nn.Module):
         output = F.log_softmax(x, dim=1)
 
         if target is not None:
+            print("\n\nTarget = ", target)
+            print("\n\nOutput = ", output)
+            print("\nOutput shape = ", output.shape)
+            print("\n")
             if self.use_slot:
                 loss = F.nll_loss(output, target) + self.lambda_value * attn_loss
                 return [output, [loss, F.nll_loss(output, target), attn_loss]]
