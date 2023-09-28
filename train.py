@@ -14,6 +14,9 @@ import numpy as np
 from thop import profile, clever_format
 import tensorly as tl
 
+# ignoring deprecated warnings
+import warnings
+warnings.filterwarnings("ignore")
 
 def get_args_parser():
     def str2bool(v):
@@ -82,6 +85,7 @@ def get_args_parser():
 def main(args):
     prt.init_distributed_mode(args)
     device = torch.device(args.device)
+    # print("ss => ", torch.cuda.is_available())
 
     model = SlotModel(args)
     print("train model: " + f"{'use slot ' if args.use_slot else 'without slot '}" + f"{'negetive loss' if args.use_slot and args.loss_status != 1 else 'positive loss'}")
@@ -142,11 +146,16 @@ def main(args):
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('number of params:', n_parameters)
 
-    params = [p for p in model_without_ddp.parameters() if p.requires_grad]
+    plist = list(model_without_ddp.parameters())
+    # print(plist)
+    params = [p for p in plist if p.requires_grad]
     optimizer = torch.optim.AdamW(params, lr=args.lr)
     criterion = torch.nn.CrossEntropyLoss()
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.lr_drop)
 
+    # abcd = select_dataset(args)
+    # print(abcd)
+    # dataset_train, dataset_val = abcd
     dataset_train, dataset_val = select_dataset(args)
 
     if args.distributed:
@@ -161,7 +170,7 @@ def main(args):
     output_dir = Path(args.output_dir)
 
     if args.resume:
-        checkpoint = torch.load(args.resume, map_location='cpu')
+        checkpoint = torch.load(args.pre_dir, map_location='cpu')
         model_without_ddp.load_state_dict(checkpoint['model'])
         if 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             optimizer.load_state_dict(checkpoint['optimizer'])
@@ -233,6 +242,9 @@ def param_translation(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('model training and evaluation script', parents=[get_args_parser()])
     args = parser.parse_args()
+
+    # print(args)
+
     if args.output_dir:
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     param_translation(args)
