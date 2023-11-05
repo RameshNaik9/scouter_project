@@ -19,7 +19,8 @@ _pil_interpolation_to_str = {
 class Resize(object):
     """class for resize images. """
     def __init__(self, size, interpolation=Image.BILINEAR):
-        assert isinstance(size, int) or (isinstance(size, Iterable) and len(size) == 2)
+        assert isinstance(size, int) or (
+            isinstance(size, Iterable) and len(size) == 2)
         self.size = size
         self.interpolation = interpolation
 
@@ -38,7 +39,8 @@ class Aug(object):
 
     def __call__(self, image):
         if self.aug:
-            ImgAug = ImageAugment()   # ImageAugment class will augment the img and label at same time
+            # ImageAugment class will augment the img and label at same time
+            ImgAug = ImageAugment()
             seq = ImgAug.aug_sequence()
             image_aug = ImgAug.aug(image, seq)
             return image_aug
@@ -63,7 +65,8 @@ class ToTensor(object):
     def __call__(self, image, color=True):
         if image.ndim == 2:
             image = image[:, :, None]
-        image = torch.from_numpy(((image/255).transpose([2, 0, 1])).copy())  # convert numpy data to tensor
+        # convert numpy data to tensor
+        image = torch.from_numpy(((image/255).transpose([2, 0, 1])).copy())
         return image
 
     def __repr__(self):
@@ -101,7 +104,8 @@ class Normalize(object):
 def make_transform(args, mode):
     normalize_value = {"MNIST": [[0.1307], [0.3081]],
                        "CUB200": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
-                     "ConText": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
+                       "BT": [[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]],
+                       "ConText": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
                        "ImageNet": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]]}
     selected_norm = normalize_value[args.dataset]
     normalize = Compose([

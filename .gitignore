@@ -8,3 +8,4 @@ sloter/vis*/
 scripts/
 temp*
 timm/.DS_Store
+__pycache__/

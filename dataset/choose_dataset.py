@@ -1,8 +1,9 @@
 from dataset.mnist import MNIST
 from dataset.CUB200 import CUB_200
+from dataset.BT import BT
 from dataset.ConText import ConText, MakeList, MakeListImage
 from dataset.transform_func import make_transform
-
+import os
 
 def select_dataset(args):
     if args.dataset == "MNIST":
@@ -22,6 +23,12 @@ def select_dataset(args):
         train, val = MakeListImage(args).get_data()
         dataset_train = ConText(train, transform=make_transform(args, "train"))
         dataset_val = ConText(val, transform=make_transform(args, "val"))
+        return dataset_train, dataset_val
+    if args.dataset == "BT":
+        root = os.path.join(os.curdir, 'data', 'BT')
+        os.makedirs(root, exist_ok=True)
+        dataset_train = BT(root, args, train=True, download=True, transform=make_transform(args, "train"))
+        dataset_val = BT(root, args, train=False, download=True, transform=make_transform(args, "val"))
         return dataset_train, dataset_val
 
     raise ValueError(f'unknown {args.dataset}')
