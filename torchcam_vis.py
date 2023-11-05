@@ -15,6 +15,7 @@ from torchcam.utils import overlay_mask
 from tqdm import tqdm
 from dataset.ConText import ConText, MakeList, MakeListImage
 from dataset.CUB200 import CUB_200
+from dataset.BT import BT
 
 from torchcam.IGOS import Get_blurred_img, Integrated_Mask
 from torchray.attribution.rise import rise
@@ -100,6 +101,22 @@ def for_vis(args):
         image_orl = Image.fromarray((image.cpu().detach().numpy()*255).astype(np.uint8).transpose((1,2,0)), mode='RGB')
         image = transform(image_orl)
         transform = transforms.Compose([transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+    
+    # BT
+    elif args.dataset == 'BT':
+        root = os.path.join(os.curdir, 'data', 'BT')
+        dataset_val = BT(root, args=args, train=True, download=False, transform=transform)
+        data_loader_val = torch.utils.data.DataLoader(dataset_val, args.batch_size, shuffle=False, num_workers=1, pin_memory=True)
+        # data = iter(data_loader_val).next()
+        dataiter = iter(data_loader_val)
+        dt = next(dataiter)
+        image = dt["image"][0]
+        label = dt["label"][0].item()
+        image_orl = Image.fromarray((image.cpu().detach().numpy()*255).astype(np.uint8).transpose((1,2,0)), mode='RGB')
+        image = transform(image_orl)
+        transform = transforms.Compose([transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+        image = transform(image)
+    
     image = transform(image)
     image = image.unsqueeze(0)
     device = torch.device(args.device)
