@@ -60,20 +60,15 @@ def main():
     total = 0
     correct = 0
 
-    num_classes = args.num_classes
-    confusion_matrix = np.zeros((num_classes, num_classes), dtype=int)
-
-    class_correct = [0] * num_classes
-    class_total = [0] * num_classes
-
-    print("Starting test:")
-
-    for sample in data_loader:
+    print("Starting test :")
+    for sample in dataiter:
         image = sample["image"][0]
-        label = sample["label"][0].int().item()
+        label = sample["label"][0]
 
-        # if(label == 1):
-        #     continue
+        # 
+        if(label.int().item() == 1):
+            continue
+
         transform = transforms.Compose([
             transforms.Resize((args.img_size, args.img_size)),
             transforms.ToTensor(),
@@ -86,29 +81,15 @@ def main():
         result = test(model, device, image)
 
         total += 1
-
         if result == label:
             correct += 1
-            class_correct[label] += 1
 
-        class_total[label] += 1
+    print("Total = ", total)
+    print("Correct = ", correct)
 
-        confusion_matrix[label][result] += 1
+    accuracy = correct / total * 100
+    print("Accuracy = ", accuracy)
 
-
-
-    print("Total =", total)
-    print("Correct =", correct)
-    print("Accuracy =", correct / total * 100)
-
-    # Print confusion matrix
-    print("Confusion Matrix:")
-    print(confusion_matrix)
-
-    # Print per-class accuracy
-    for i, (total, correct) in enumerate(zip(class_total, class_correct)):
-        if total > 0:
-            print(f"Accuracy of class {i} ({['No Tumor', 'Glioma Tumor', 'Meningioma Tumor', 'Pituitary Tumor'][i]}): {correct / total * 100:.2f}%")
 
 if __name__ == '__main__':
     main()
