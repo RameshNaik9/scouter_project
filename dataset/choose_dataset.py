@@ -68,7 +68,7 @@ def select_dataset(args):
 
     if args.dataset == "SkinCancer":
         # Define paths to image folder and CSV file
-        args.dataset_dir = "/content/proposedModel/data/skin-cancer-mnist-ham10000"
+        args.dataset_dir = "/content/scouter_project/data/skin-cancer-mnist-ham10000"
         csv_file = os.path.join(args.dataset_dir, "HAM10000_metadata.csv")
         img_dir = os.path.join(args.dataset_dir, "HAM10000_images_part_")
 

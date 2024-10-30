@@ -14,6 +14,8 @@ from train import get_args_parser
 from torchvision import datasets, transforms
 from dataset.ConText import ConText, MakeList, MakeListImage
 from dataset.CUB200 import CUB_200
+from dataset.choose_dataset import select_dataset
+from PIL import ImageOps
 
 # ignoring deprecated warnings
 import warnings
@@ -29,17 +31,27 @@ def test(args, model, device, img, image, label, vis_id):
     print(pred[0])
 
     #For vis
-    image_raw = img
-    image_raw.save('sloter/vis/image.png')
+    # image_raw = img
+    # image_raw.save('sloter/vis/image.png')
+    # After loading the RGB image, convert it to grayscale for visualization
+    image_raw = img.convert('L')  # Convert to grayscale
+    image_raw.save('sloter/vis/image_grayscale.png')
     print(torch.argmax(output[vis_id]).item())
     model.train()
-
+    # Apply colormap and overlay heatmap on grayscale image
     for id in range(args.num_classes):
-        image_raw = Image.open('sloter/vis/image.png').convert('RGB')
-        slot_image = np.array(Image.open(f'sloter/vis/slot_{id}.png').resize(image_raw.size, resample=Image.BILINEAR), dtype=np.uint8)
+        grayscale_image = Image.open('sloter/vis/image_grayscale.png').convert('RGB')
+        slot_image = np.array(Image.open(f'sloter/vis/slot_{id}.png').resize(grayscale_image.size, resample=Image.BILINEAR), dtype=np.uint8)
 
-        heatmap_only, heatmap_on_image = apply_colormap_on_image(image_raw, slot_image, 'jet')
-        heatmap_on_image.save(f'sloter/vis/slot_mask_{id}.png')
+        heatmap_only, heatmap_on_image = apply_colormap_on_image(grayscale_image, slot_image, 'jet')
+        heatmap_on_image.save(f'sloter/vis/slot_mask_{id}_on_grayscale.png')
+
+    # for id in range(args.num_classes):
+    #     image_raw = Image.open('sloter/vis/image.png').convert('RGB')
+    #     slot_image = np.array(Image.open(f'sloter/vis/slot_{id}.png').resize(image_raw.size, resample=Image.BILINEAR), dtype=np.uint8)
+
+    #     heatmap_only, heatmap_on_image = apply_colormap_on_image(image_raw, slot_image, 'jet')
+    #     heatmap_on_image.save(f'sloter/vis/slot_mask_{id}.png')
 
     if args.cal_area_size:
         slot_image = np.array(Image.open(f'sloter/vis/slot_{str(label) if args.loss_status>0 else str(label+1)}.png'), dtype=np.uint8)
@@ -92,6 +104,15 @@ def main():
         image = data["image"][0]
         label = data["label"][0].item()
         image_orl = Image.fromarray((image.cpu().detach().numpy()*255).astype(np.uint8).transpose((1,2,0)), mode='RGB')
+        image = transform(image_orl)
+        transform = transforms.Compose([transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+    elif args.dataset == "SkinCancer":
+        _, dataset_val = select_dataset(args)
+        data_loader_val = torch.utils.data.DataLoader(dataset_val, batch_size=args.batch_size, shuffle=True, num_workers=1, pin_memory=True)
+        data = next(iter(data_loader_val))
+        image = data["image"][0]
+        label = data["label"][0].item()
+        image_orl = Image.fromarray((image.cpu().detach().numpy() * 255).astype(np.uint8).transpose((1, 2, 0)), mode='RGB')
         image = transform(image_orl)
         transform = transforms.Compose([transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
     # MNIST
