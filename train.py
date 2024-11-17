@@ -60,6 +60,7 @@ def get_args_parser():
     parser.add_argument('--lambda_value', default="1.", type=str, help='lambda of slot loss')
     parser.add_argument('--vis', default=False, type=str2bool, help='whether save slot visualization')
     parser.add_argument('--vis_id', default=0, type=int, help='choose image to visualization')
+    parser.add_argument("--num_heads",default=4,type=int,help="Number of attention heads in Slot Attention",)
 
     # data/machine set
     parser.add_argument('--dataset_dir', default='../PAN/bird_200/CUB_200_2011/CUB_200_2011/',

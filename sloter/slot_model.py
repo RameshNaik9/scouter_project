@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from sloter.utils.slot_attention import SlotAttention
+# from sloter.utils.slot_attention import SlotAttention
+from sloter.utils.slot_attention import MultiHeadSlotAttention
 from sloter.utils.position_encode import build_position_encoding
 from timm.models import create_model
 from collections import OrderedDict
@@ -68,8 +69,20 @@ class SlotModel(nn.Module):
             self.conv1x1 = nn.Conv2d(self.channel, args.hidden_dim, kernel_size=(1, 1), stride=(1, 1))
             if args.pre_trained:
                 self.dfs_freeze(self.backbone, args.freeze_layers)
-            self.slot = SlotAttention(args.num_classes, self.slots_per_class, args.hidden_dim, vis=args.vis,
-                                         vis_id=args.vis_id, loss_status=args.loss_status, power=args.power, to_k_layer=args.to_k_layer)
+            # self.slot = SlotAttention(args.num_classes, self.slots_per_class, args.hidden_dim, vis=args.vis,
+                                        #  vis_id=args.vis_id, loss_status=args.loss_status, power=args.power, to_k_layer=args.to_k_layer)
+            self.slot = MultiHeadSlotAttention(
+                args.num_classes,
+                args.slots_per_class,
+                args.hidden_dim,
+                num_heads=args.num_heads,
+                vis=args.vis,
+                vis_id=args.vis_id,
+                loss_status=args.loss_status,
+                power=args.power,
+                to_k_layer=args.to_k_layer,
+            )
+
             self.position_emb = build_position_encoding('sine', hidden_dim=args.hidden_dim)
             self.lambda_value = float(args.lambda_value)
         else:
