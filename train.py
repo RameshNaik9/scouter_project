@@ -49,6 +49,8 @@ def get_args_parser():
     parser.add_argument('--iterated_evaluation_num', default=1, type=int, help='used for iterated evaluation')
     parser.add_argument('--cal_area_size', default=False, type=str2bool, help='whether to calculate for area size of the attention map')
     parser.add_argument('--thop', default=False, type=str2bool, help='whether to only calculate for the model costs (no training)')
+    parser.add_argument("--preprocess", default=False, type=str2bool, help="Enable dataset preprocessing")
+
 
     # slot setting
     parser.add_argument('--loss_status', default=1, type=int, help='positive or negative loss')

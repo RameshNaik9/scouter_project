@@ -70,6 +70,8 @@ def main():
     for arg_id, arg in enumerate(args_for_evaluation):
         args_dict[arg] = args_type[arg_id](args_dict[arg])
 
+
+    args.dataset_dir = "/content/scouter_project/data/skin-cancer-mnist-ham10000"  # Set dataset directory for SkinCancer
     os.makedirs('sloter/vis', exist_ok=True)
 
     model_name = f"{args.dataset}_" + f"{'use_slot_' if args.use_slot else 'no_slot_'}"\
